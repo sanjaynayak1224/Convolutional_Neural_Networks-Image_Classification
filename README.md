@@ -5,7 +5,7 @@
 [![Torchvision](https://img.shields.io/badge/Torchvision-0.15%2B-red?logo=pytorch&logoColor=white)](https://pytorch.org/vision/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-An end-to-end deep learning project built to classify images into 10 distinct categories using the CIFAR-10 dataset. I designed, built, and trained a PyTorch-based Convolutional Neural Network (CNN) that achieves **75.65% accuracy** on unseen test data—demonstrating spatial feature extraction, image preprocessing, and deep learning pipeline design.
+An end-to-end deep learning project built to classify images into 10 distinct categories using the CIFAR-10 dataset. I designed, built, and trained a PyTorch-based Convolutional Neural Network (CNN) that achieves **73.89% accuracy** on unseen test data—demonstrating spatial feature extraction, image preprocessing, and deep learning pipeline design.
 
 ---
 
@@ -55,28 +55,28 @@ During training, I ran the optimization loop for **10 epochs**. The average trai
 
 | Epoch        | Training Loss (Average per Batch) |
 | :----------- | :-------------------------------: |
-| **Epoch 1**  |              1.3829               |
-| **Epoch 2**  |              0.9521               |
-| **Epoch 3**  |              0.7685               |
-| **Epoch 4**  |              0.6334               |
-| **Epoch 5**  |              0.5282               |
-| **Epoch 6**  |              0.4334               |
-| **Epoch 7**  |              0.3466               |
-| **Epoch 8**  |              0.2737               |
-| **Epoch 9**  |              0.2112               |
-| **Epoch 10** |            **0.1660**             |
+| **Epoch 1**  |              0.0812               |
+| **Epoch 2**  |              0.0833               |
+| **Epoch 3**  |              0.0778               |
+| **Epoch 4**  |              0.0741               |
+| **Epoch 5**  |              0.0705               |
+| **Epoch 6**  |              0.0721               |
+| **Epoch 7**  |              0.0614               |
+| **Epoch 8**  |              0.0649               |
+| **Epoch 9**  |              0.0644               |
+| **Epoch 10** |            **0.0653**             |
 
 ### Testing Results (Unseen Data)
 
 - **Total Samples Evaluated**: 10,000
-- **Correct Predictions**: 7,565
-- **Accuracy Score**: **75.65%**
+- **Correct Predictions**: 7,389
+- **Accuracy Score**: **73.89%**
 
 ### 💡 What the numbers tell us
 
-- **Spatial features are key**: A test accuracy of **75.65%** is a very strong baseline result for a simple 3-layer CNN. Since a random guess on 10 classes yields only 10% accuracy, this shows the network successfully learned to recognize distinctive spatial features (like wheels on cars, wings on planes, or ears on cats).
-- **Clear Convergence**: The training loss dropped smoothly from 1.3829 down to 0.1660, confirming that the Adam optimizer worked perfectly to minimize our cross-entropy loss.
-- **Addressing Overfitting**: While the training loss dropped all the way to 0.1660, our testing accuracy leveled out at 75.65%. This gap indicates that the model is beginning to overfit the training dataset (memorizing specific details of the training set rather than learning generic patterns). Adding regularization would be the next step to close this gap.
+- **Spatial features are key**: A test accuracy of **73.89%** is a strong baseline result for a simple 3-layer CNN. Since a random guess on 10 classes yields only 10% accuracy, this shows the network successfully learned to recognize distinctive spatial features (like wheels on cars, wings on planes, or ears on cats).
+- **Clear Convergence**: The training loss converged well, with per-batch averages settling into the 0.06–0.08 range, confirming that the Adam optimizer worked effectively to minimize our cross-entropy loss.
+- **Addressing Overfitting**: The low training loss combined with a testing accuracy of 73.89% indicates that the model is beginning to overfit the training dataset (memorizing specific details of the training set rather than learning generic patterns). Adding regularization would be the next step to close this gap.
 
 ---
 
