@@ -5,7 +5,7 @@
 [![Torchvision](https://img.shields.io/badge/Torchvision-0.15%2B-red?logo=pytorch&logoColor=white)](https://pytorch.org/vision/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-An end-to-end deep learning project built to classify images into 10 distinct categories using the CIFAR-10 dataset. I designed, built, and trained a PyTorch-based Convolutional Neural Network (CNN) that achieves **73.89% accuracy** on unseen test data—demonstrating spatial feature extraction, image preprocessing, and deep learning pipeline design.
+An end-to-end deep learning project built to classify images into 10 distinct categories using the CIFAR-10 dataset. I designed, built, and trained a PyTorch-based Convolutional Neural Network (CNN) from scratch that achieves **82.93% accuracy** on unseen test data—demonstrating spatial feature extraction, image regularization, data augmentation, and deep learning pipeline design.
 
 ---
 
@@ -15,20 +15,27 @@ The project follows a standard PyTorch computer vision workflow, from image prep
 
 ```mermaid
 graph TD
-    A[Raw CIFAR-10 Images 32x32 RGB] --> B[Convert to Tensor & Normalize to -1, 1]
-    B --> C[Create Mini-Batches via DataLoader batch_size=64]
-    C --> D[CNN Architecture Design]
-    D --> E[Model Training with CrossEntropyLoss & Adam]
-    E --> F[Model Evaluation on Test Dataset]
-    F --> G[Performance Metrics & Accuracy Reporting]
+    A["Raw CIFAR-10 Images (32x32 RGB)"] --> B["Data Augmentation & Normalization"]
+    B --> C["Create Mini-Batches via DataLoader (batch_size=64)"]
+    C --> D["Upgraded CNN Architecture (BatchNorm + Dropout)"]
+    D --> E["Model Training (CrossEntropyLoss + Adam + ReduceLROnPlateau)"]
+    E --> F["Model Evaluation on Test Dataset"]
+    F --> G["Performance Metrics & Plots Generation"]
 ```
 
 ### Behind the Scenes: How the Pipeline is Built
 
-To get the raw image pixel data ready for the convolutional layers, I built a structured PyTorch preprocessing pipeline:
+To get the raw image pixel data ready for the convolutional layers and prevent overfitting, I built a structured PyTorch preprocessing and data augmentation pipeline:
 
-- **Normalizing pixel values**: The raw images are 32x32 pixels with 3 color channels (RGB) and pixel values ranging from 0 to 255. I used `transforms.ToTensor()` to scale these pixel values to `[0, 1]`, and then applied `transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))` to scale them to the range `[-1, 1]`. This centering and scaling step prevents exploding/vanishing gradients and helps the neural network converge much faster during backpropagation.
-- **Loading and Batching**: Because we can't fit the entire dataset of 50,000 training images into memory at once, I wrapped the datasets in PyTorch `DataLoader` objects. I set the batch size to `64` and enabled shuffling on the training set to ensure the network doesn't memorize the order of the images.
+*   **Data Augmentation**: During training, the model sees slightly augmented versions of the images to teach it translation and orientation invariance. We apply `transforms.RandomHorizontalFlip()` and `transforms.RandomCrop(32, padding=4)`.
+*   **Normalizing Pixel Values**: We use `transforms.ToTensor()` to scale pixel values to `[0, 1]`, and then apply `transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))` to scale them to the range `[-1, 1]`. This centering and scaling step prevents exploding/vanishing gradients and helps the neural network converge much faster.
+*   **Loading and Batching**: Because we can't fit the entire dataset of 50,000 training images into memory at once, I wrapped the datasets in PyTorch `DataLoader` objects. I set the batch size to `64` and enabled shuffling on the training set.
+
+### 📸 Dataset Visualizations
+
+Here is a selection of raw samples from the CIFAR-10 dataset representing each of the 10 target classes:
+
+![CIFAR-10 Samples](plots/sample_images_grid.png)
 
 ---
 
@@ -36,59 +43,67 @@ To get the raw image pixel data ready for the convolutional layers, I built a st
 
 I built a Convolutional Neural Network (CNN) using PyTorch's `nn.Module` with the following layers:
 
-- **Convolutional Block 1**: Accepts the 3-channel RGB image. It has a `Conv2d` layer (32 output channels, 3x3 kernel, padding of 1 to preserve dimensions), a `ReLU` activation, and a `MaxPool2d` layer (2x2 kernel, stride of 2) which downsamples the feature map from 32x32 to 16x16.
-- **Convolutional Block 2**: A `Conv2d` layer (32 to 64 channels, 3x3 kernel, padding of 1), a `ReLU` activation, and a `MaxPool2d` layer that downsamples the feature map from 16x16 to 8x8.
-- **Convolutional Block 3**: A `Conv2d` layer (64 to 128 channels, 3x3 kernel, padding of 1), a `ReLU` activation, and a `MaxPool2d` layer that downsamples the final spatial dimensions to 4x4.
-- **Fully Connected (FC) Block**: I flattened the 128 channels of 4x4 feature maps into a single 2,048-dimensional vector. Then, I passed it through a linear layer mapping to 256 nodes (with a `ReLU` activation) and a final linear layer mapping to the 10 outputs corresponding to the logits for each CIFAR-10 class.
+*   **Convolutional Block 1**: Accepts the 3-channel RGB image. It has a `Conv2d` layer (32 output channels, 3x3 kernel, padding of 1 to preserve dimensions), a `BatchNorm2d` layer (to normalize activations and speed up training), a `ReLU` activation, and a `MaxPool2d` layer (2x2 kernel, stride of 2) which downsamples the feature map from 32x32 to 16x16.
+*   **Convolutional Block 2**: A `Conv2d` layer (32 to 64 channels, 3x3 kernel, padding of 1), a `BatchNorm2d` layer, a `ReLU` activation, and a `MaxPool2d` layer that downsamples the feature map from 16x16 to 8x8.
+*   **Convolutional Block 3**: A `Conv2d` layer (64 to 128 channels, 3x3 kernel, padding of 1), a `BatchNorm2d` layer, a `ReLU` activation, and a `MaxPool2d` layer that downsamples the final spatial dimensions to 4x4.
+*   **Fully Connected (FC) Block**: We flatten the 128 channels of 4x4 feature maps into a single 2,048-dimensional vector. Then, we pass it through a linear layer mapping to 256 nodes (with a `ReLU` activation), apply a `Dropout(p=0.3)` layer to prevent the network from relying too heavily on individual neurons, and a final linear layer mapping to the 10 outputs corresponding to the logits for each CIFAR-10 class.
 
-I compiled the model using `CrossEntropyLoss` to measure classification error and the `Adam` optimizer to update the network weights.
+I compiled the model using `CrossEntropyLoss` to measure classification error, the `Adam` optimizer to update the network weights, and `ReduceLROnPlateau` to decay the learning rate when training loss plateaus.
 
 ---
 
 ## 📊 Model Evaluation & Results
 
-Here are the training and testing metrics I recorded from the model run:
+Here are the training and testing metrics recorded from the model run:
 
 ### Training Loss Progression
 
-During training, I ran the optimization loop for **10 epochs**. The average training loss per batch steadily converged:
+The model was trained for **25 epochs**. The training loss steadily converged over time, aided by the learning rate scheduler:
 
-| Epoch        | Training Loss (Average per Batch) |
-| :----------- | :-------------------------------: |
-| **Epoch 1**  |              0.0812               |
-| **Epoch 2**  |              0.0833               |
-| **Epoch 3**  |              0.0778               |
-| **Epoch 4**  |              0.0741               |
-| **Epoch 5**  |              0.0705               |
-| **Epoch 6**  |              0.0721               |
-| **Epoch 7**  |              0.0614               |
-| **Epoch 8**  |              0.0649               |
-| **Epoch 9**  |              0.0644               |
-| **Epoch 10** |            **0.0653**             |
+| Epoch | Training Loss (Average per Batch) |
+| :--- | :---: |
+| **Epoch 1** | 1.4713 |
+| **Epoch 5** | 0.8727 |
+| **Epoch 10** | 0.7102 |
+| **Epoch 15** | 0.6145 |
+| **Epoch 20** | 0.5576 |
+| **Epoch 25** | **0.5241** |
+
+![Training Loss Convergence](plots/training_loss_curve.png)
 
 ### Testing Results (Unseen Data)
 
-- **Total Samples Evaluated**: 10,000
-- **Correct Predictions**: 7,389
-- **Accuracy Score**: **73.89%**
+*   **Total Samples Evaluated**: 10,000
+*   **Correct Predictions**: 8,293
+*   **Accuracy Score**: **82.93%**
 
-### 💡 What the numbers tell us
+### 💡 Visual Proof & Performance Analysis
 
-- **Spatial features are key**: A test accuracy of **73.89%** is a strong baseline result for a simple 3-layer CNN. Since a random guess on 10 classes yields only 10% accuracy, this shows the network successfully learned to recognize distinctive spatial features (like wheels on cars, wings on planes, or ears on cats).
-- **Clear Convergence**: The training loss converged well, with per-batch averages settling into the 0.06–0.08 range, confirming that the Adam optimizer worked effectively to minimize our cross-entropy loss.
-- **Addressing Overfitting**: The low training loss combined with a testing accuracy of 73.89% indicates that the model is beginning to overfit the training dataset (memorizing specific details of the training set rather than learning generic patterns). Adding regularization would be the next step to close this gap.
+#### Confusion Matrix
+The confusion matrix shows which classes the model identifies accurately and where it makes errors. The model performs exceptionally well on distinct classes like ships (**93.1%**) and automobiles (**92.7%**), but encounters expected confusion between similar classes like cats and dogs.
+
+![Confusion Matrix](plots/confusion_matrix.png)
+
+#### Per-Class Accuracy Breakdown
+A granular look at the accuracy for each class:
+
+![Per-Class Accuracy](plots/per_class_accuracy.png)
+
+#### Sample Predictions on Test Images
+A visualization of actual model predictions on random test images, highlighting correct classifications in green and errors in red:
+
+![Sample Predictions](plots/sample_predictions.png)
 
 ---
 
 ## 🚀 Next Steps: How I'd Take This Further
 
-If I had more time or were preparing this model for a production computer vision pipeline, here are the 5 strategies I would implement to push performance even higher:
+If I were preparing this model for a production computer vision pipeline, here are the strategies I would implement to push performance even higher:
 
-1. **Add Data Augmentation**: Currently, the model sees the exact same training images every epoch. I would introduce random horizontal flips, cropping, and rotations (`transforms.RandomHorizontalFlip`, `transforms.RandomCrop`) to the training pipeline. This artificially increases dataset diversity and teaches the model to be invariant to object position and orientation.
-2. **Implement Dropout and Batch Normalization**: To combat the overfitting, I'd add `nn.Dropout(p=0.3)` layers after our dense layer and add `nn.BatchNorm2d` after each convolutional layer. Batch normalization stabilizes training and allows for higher learning rates, while dropout forces the network to learn robust, redundant representations.
-3. **Use a Learning Rate Scheduler**: A fixed learning rate of 0.001 can sometimes cause the weights to bounce around local minima late in training. I would add a scheduler like `ReduceLROnPlateau` or `CosineAnnealingLR` to decay the learning rate when validation loss plateaus, allowing the network to settle smoothly into a global minimum.
-4. **Leverage Transfer Learning (Pre-trained Models)**: Building a CNN from scratch is a great exercise, but pre-trained networks like **ResNet-18** or **VGG-16** (trained on ImageNet) have already learned millions of visual features. Fine-tuning one of these models on CIFAR-10 would easily boost our test accuracy past 90%.
-5. **Set aside a Validation Set and Use Early Stopping**: Currently, we evaluate directly on the test set. I'd split the training set to hold out 10% of the images as a validation split. By monitoring validation loss during training, I could save the model checkpoint only when validation performance improves, preventing overfitting at the final epoch.
+1.  **Hyperparameter Tuning**: Run grid or random search on batch size, initial learning rate, and dropout probability to find the optimal combination.
+2.  **Advanced Augmentations**: Introduce color jittering, random rotations, and AutoAugment techniques to further diversify the training data.
+3.  **Validation Set & Early Stopping**: Split the training set to hold out 10% of the images as a validation split. Monitor validation loss during training and stop early if it starts to degrade.
+4.  **Transfer Learning**: Fine-tune a pre-trained state-of-the-art model like ResNet-18 or EfficientNet-B0 to leverage features learned from ImageNet, which would easily push the test accuracy past 95%.
 
 ---
 
@@ -105,21 +120,21 @@ cd Convolutional_Neural_Networks-Image_Classification
 
 ### 2. Spin Up a Virtual Environment
 
-- **On Windows (PowerShell):**
-  ```powershell
-  python -m venv .venv
-  .venv\Scripts\Activate.ps1
-  ```
-- **On macOS/Linux:**
-  ```bash
-  python3 -m venv .venv
-  source .venv/bin/activate
-  ```
+*   **On Windows (PowerShell):**
+    ```powershell
+    python -m venv .venv
+    .venv\Scripts\Activate.ps1
+    ```
+*   **On macOS/Linux:**
+    ```bash
+    python3 -m venv .venv
+    source .venv/bin/activate
+    ```
 
 ### 3. Install the Packages
 
 ```bash
-pip install torch torchvision ipykernel
+pip install torch torchvision ipykernel matplotlib seaborn scikit-learn
 ```
 
 _(Note: The CIFAR-10 dataset files are already stored locally in the `data/` directory, so running the notebook will verify the files and start training immediately without waiting for a large download.)_

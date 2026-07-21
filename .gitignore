@@ -19,3 +19,6 @@ __pycache__/
 
 # Data directory download (CIFAR-10 data)
 data/
+
+# Keep plots/ tracked — needed for README images
+!plots/
