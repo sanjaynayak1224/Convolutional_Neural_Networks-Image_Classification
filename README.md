@@ -13,15 +13,9 @@ An end-to-end deep learning project built to classify images into 10 distinct ca
 
 The project follows a standard PyTorch computer vision workflow, from image preprocessing to testing. Here is the general structure:
 
-```mermaid
-graph TD
-    A["Raw CIFAR-10 Images (32x32 RGB)"] --> B["Data Augmentation & Normalization"]
-    B --> C["Create Mini-Batches via DataLoader (batch_size=64)"]
-    C --> D["Upgraded CNN Architecture (BatchNorm + Dropout)"]
-    D --> E["Model Training (CrossEntropyLoss + Adam + ReduceLROnPlateau)"]
-    E --> F["Model Evaluation on Test Dataset"]
-    F --> G["Performance Metrics & Plots Generation"]
-```
+<p align="center">
+  <img src="plots/pipeline.png" alt="Pipeline Workflow" width="85%"/>
+</p>
 
 ### Behind the Scenes: How the Pipeline is Built
 
@@ -35,7 +29,9 @@ To get the raw image pixel data ready for the convolutional layers and prevent o
 
 Here is a selection of raw samples from the CIFAR-10 dataset representing each of the 10 target classes:
 
-![CIFAR-10 Samples](plots/sample_images_grid.png)
+<p align="center">
+  <img src="plots/sample_images_grid.png" alt="CIFAR-10 Samples" width="85%"/>
+</p>
 
 ---
 
@@ -47,6 +43,10 @@ I built a Convolutional Neural Network (CNN) using PyTorch's `nn.Module` with th
 *   **Convolutional Block 2**: A `Conv2d` layer (32 to 64 channels, 3x3 kernel, padding of 1), a `BatchNorm2d` layer, a `ReLU` activation, and a `MaxPool2d` layer that downsamples the feature map from 16x16 to 8x8.
 *   **Convolutional Block 3**: A `Conv2d` layer (64 to 128 channels, 3x3 kernel, padding of 1), a `BatchNorm2d` layer, a `ReLU` activation, and a `MaxPool2d` layer that downsamples the final spatial dimensions to 4x4.
 *   **Fully Connected (FC) Block**: We flatten the 128 channels of 4x4 feature maps into a single 2,048-dimensional vector. Then, we pass it through a linear layer mapping to 256 nodes (with a `ReLU` activation), apply a `Dropout(p=0.3)` layer to prevent the network from relying too heavily on individual neurons, and a final linear layer mapping to the 10 outputs corresponding to the logits for each CIFAR-10 class.
+
+<p align="center">
+  <img src="plots/architecture.png" alt="CNN Architecture Diagram" width="85%"/>
+</p>
 
 I compiled the model using `CrossEntropyLoss` to measure classification error, the `Adam` optimizer to update the network weights, and `ReduceLROnPlateau` to decay the learning rate when training loss plateaus.
 
@@ -69,7 +69,9 @@ The model was trained for **25 epochs**. The training loss steadily converged ov
 | **Epoch 20** | 0.5576 |
 | **Epoch 25** | **0.5241** |
 
-![Training Loss Convergence](plots/training_loss_curve.png)
+<p align="center">
+  <img src="plots/training_loss_curve.png" alt="Training Loss Convergence" width="85%"/>
+</p>
 
 ### Testing Results (Unseen Data)
 
@@ -82,17 +84,23 @@ The model was trained for **25 epochs**. The training loss steadily converged ov
 #### Confusion Matrix
 The confusion matrix shows which classes the model identifies accurately and where it makes errors. The model performs exceptionally well on distinct classes like ships (**93.1%**) and automobiles (**92.7%**), but encounters expected confusion between similar classes like cats and dogs.
 
-![Confusion Matrix](plots/confusion_matrix.png)
+<p align="center">
+  <img src="plots/confusion_matrix.png" alt="Confusion Matrix" width="85%"/>
+</p>
 
 #### Per-Class Accuracy Breakdown
 A granular look at the accuracy for each class:
 
-![Per-Class Accuracy](plots/per_class_accuracy.png)
+<p align="center">
+  <img src="plots/per_class_accuracy.png" alt="Per-Class Accuracy" width="85%"/>
+</p>
 
 #### Sample Predictions on Test Images
 A visualization of actual model predictions on random test images, highlighting correct classifications in green and errors in red:
 
-![Sample Predictions](plots/sample_predictions.png)
+<p align="center">
+  <img src="plots/sample_predictions.png" alt="Sample Predictions" width="85%"/>
+</p>
 
 ---
 
