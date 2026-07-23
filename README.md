@@ -122,7 +122,7 @@ If you want to run the notebook on your local machine, here is the quick-start g
 ### 1. Clone and Navigate
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/sanjaynayak1224/Convolutional_Neural_Networks-Image_Classification.git
 cd Convolutional_Neural_Networks-Image_Classification
 ```
 
@@ -142,7 +142,7 @@ cd Convolutional_Neural_Networks-Image_Classification
 ### 3. Install the Packages
 
 ```bash
-pip install torch torchvision ipykernel matplotlib seaborn scikit-learn
+pip install -r requirements.txt
 ```
 
 _(Note: The CIFAR-10 dataset files are already stored locally in the `data/` directory, so running the notebook will verify the files and start training immediately without waiting for a large download.)_
