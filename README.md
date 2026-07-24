@@ -126,7 +126,7 @@ git clone https://github.com/sanjaynayak1224/Convolutional_Neural_Networks-Image
 cd Convolutional_Neural_Networks-Image_Classification
 ```
 
-### 2. Spin Up a Virtual Environment
+### 2. Spin Up a Virtual Environment 
 
 *   **On Windows (PowerShell):**
     ```powershell
